@@ -28,17 +28,128 @@ def  show_menu():
     return option
 
 
+def get_record():
+    print("")
+    first = input("Enter first name > ")
+    last = input("Enter last name > ")
+
+    # trys to find the records in the database
+    try:
+        doc=coll.find_one({"first": first.lower(), "last": last.lower()})
+
+    except:
+        print("")
+        print("Erro accessing the Database")
+
+
+    # this print an error if the records are not found
+    if not doc:
+        print("")
+        print("Error, records not found.")
+    
+    return doc
+
+
+def add_record():
+    print("")
+    first = input("Enter first name > ")
+    last = input("Enter last name > ")
+    dob = input("Enter date of birth > ")
+    gender = input("Enter gender >")
+    hair_colour = input("Enter hair colour > ")
+    occupation = input("Enter occupation > ")
+    nationality = input("Enter nationality > ")
+
+    # srores the data that is given before sending it to the database
+    new_doc={
+        "first": first.lower(),
+        "last": last.lower(),
+        "dob": dob,
+        "gender": gender,
+        "hair_colour": hair_colour,
+        "occupation": occupation,
+        "nationality": nationality,
+    }
+
+    # sends the data to the database
+    try:
+        coll.insert(new_doc)
+        print("")
+        print("Document inserted")
+    except:
+        print("")
+        print("Erro accessing the Database")
+
+
+def find_record():
+    doc = get_record()
+    if doc:
+        print("")
+        for k,v in doc.items():
+            if k != "_id":
+                print(k.capitalize() + ":" + v.capitalize())
+
+
+
+def edit_record():
+    doc = get_record()
+    if doc:
+        update_doc ={}
+        print("")
+        for k,v in doc.items():
+            if k != "_id":
+                update_doc[k] =input(k.capitalize() + "[" + v + "] > ")
+
+                if update_doc[k] =="":
+                    update_doc[k] = v
+        
+        try:
+            coll.update_one(doc,{"$set": update_doc})
+            print("")
+            print("Document Updated")
+        
+        except:
+            print("")
+            print("Erro accessing the Database")
+
+
+def delete_record():
+    doc = get_record()
+    if doc :
+        print("")
+        for k,v in doc.items():
+            if k != "_id":
+                print(k.capitalize() + ":" + v.capitalize())
+        
+        print("")
+        confirmation = input("Is this the record you want to delete? \n Y or N >")
+        print("")
+
+        if confirmation.lower() == "y":
+
+            try:
+                coll.remove(doc)
+                print("Document deleted")
+
+            except:
+                print("")
+                print("Erro accessing the Database")
+
+        else:
+            print("Document not deleted")
+
+
 def main_loop():
     while True:
         option = show_menu()
         if  option == "1":
-            print("You have selected option one")
+            add_record()
         elif  option == "2":
-            print("You have selected option three")
+            find_record()
         elif  option == "3":
-            print("You have selected option three")
+            edit_record()
         elif  option == "4":
-            print("You have selected option four")
+            delete_record()
         elif  option == "5":
             conn.close()
             break
